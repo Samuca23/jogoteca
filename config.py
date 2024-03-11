@@ -1,3 +1,5 @@
+import os
+
 SECRET_KEY = 'alura'
 
 # Configuração do SQLAlchemy
@@ -9,3 +11,5 @@ SQLALCHEMY_DATABASE_URI = \
         servidor = 'localhost',
         database = 'jogoteca'
     )
+
+UPLOAD_PATH = os.path.dirname(os.path.abspath(__file__)) + '/uploads'
