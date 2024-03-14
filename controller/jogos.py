@@ -2,6 +2,8 @@ from flask import render_template, request, redirect, session, flash, url_for, s
 from jogoteca import app
 from model.jogos import Jogos
 from db import db
+from helpers import recupera_imagem, deleta_arquivo
+import time
 
 @app.route('/')
 def index():
@@ -32,7 +34,8 @@ def criar():
 
         arquivo = request.files['arquivo']
         uploads_path = app.config['UPLOAD_PATH']
-        arquivo.save(f'{uploads_path}/capa_{novo_jogo.id}_{arquivo.filename}')
+        timestamp = time.time()
+        arquivo.save(f'{uploads_path}/capa{novo_jogo.id}-{timestamp}.jpg')
 
     return redirect(url_for('index'))
 
@@ -42,7 +45,8 @@ def editar(id) :
         return redirect(url_for('login', proxima=url_for('editar'))) 
     
     jogo = Jogos.query.filter_by(id=id).first()
-    return render_template('editar.html', titulo='Editando Jogo', jogo=jogo)
+    capa_jogo = recupera_imagem(id)
+    return render_template('editar.html', titulo='Editando Jogo', jogo=jogo, capa_jogo=capa_jogo)
 
 @app.route('/atualizar', methods=['POST']) 
 def atualizar():
@@ -53,6 +57,12 @@ def atualizar():
 
     db.session.add(jogo)
     db.session.commit()
+
+    arquivo = request.files['arquivo']
+    uploads_path = app.config['UPLOAD_PATH']
+    timestamp = time.time()
+    deleta_arquivo(jogo.id)
+    arquivo.save(f'{uploads_path}/capa{jogo.id}-{timestamp}.jpg')
 
     return redirect( url_for('index'))
 
